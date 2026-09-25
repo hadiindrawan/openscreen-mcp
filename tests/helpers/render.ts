@@ -82,3 +82,18 @@ export async function makeTextVideo(
 	]);
 	return out;
 }
+
+/** The standard censor fixture: an email, an API key, and a Balance column that scrolls up at 3 s. */
+export function censorFixtureFrames(): TextItem[][] {
+	return [0, 1, 2, 3, 4, 5].map((i) => {
+		const top = i < 3 ? 120 : 60;
+		return [
+			{ x: 40, y: 40, size: 28, text: "alice@example.com" },
+			{ x: 40, y: 300, size: 22, text: "token sk-live4f9a8b7c6d5e4f3a2b1c0d9e" },
+			{ x: 900, y: top, size: 26, text: "Balance" },
+			{ x: 900, y: top + 40, size: 26, text: "1208639943" },
+			{ x: 900, y: top + 80, size: 26, text: "1242026427" },
+			{ x: 900, y: top + 120, size: 26, text: "1204647040" },
+		];
+	});
+}

@@ -44,13 +44,13 @@ export interface Frame {
 
 const FFMPEG_HINT = "Install it with `brew install ffmpeg`.";
 
-interface AssetOnTimeline {
+export interface AssetOnTimeline {
 	assetId: string;
 	video: string;
 	endMs: number;
 }
 
-function assetsOnTimeline(doc: Doc): AssetOnTimeline[] {
+export function assetsOnTimeline(doc: Doc): AssetOnTimeline[] {
 	const ids = [...new Set(doc.timeline.clips.map((c) => c.assetId))];
 	return ids.flatMap((id) => {
 		const asset = doc.assets.find((a) => a.id === id);
