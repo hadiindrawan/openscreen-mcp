@@ -1,6 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { CATEGORIES } from "./censor/config";
+import { applyCensor, findText, previewCensor, scanProject } from "./censor/scan";
 import { addBlur, addText, TEXT_ANIMATIONS } from "./edit/annotate";
 import { cutRange } from "./edit/cut";
 import { removeRegion } from "./edit/regions";
@@ -16,7 +18,8 @@ const INSTRUCTIONS = `Edits OpenScreen screen-recording projects on this Mac.
 Workflow: list_projects (or use "latest") → describe_project → analyze_recording (clicks, cursor dwells, idle stretches, scene changes, speech) → get_frames to look at the moments that matter → edit.
 All times are timeline seconds as shown in the OpenScreen editor; cut sections keep their place on that timeline, so times from analyze_recording can be passed straight to edit tools.
 Edits fail while the OpenScreen app is running: ask the user to quit it (⌘Q). After editing, tell the user to reopen the project in OpenScreen to preview and export.
-undo_last_edit reverts the most recent edit made through this server.`;
+undo_last_edit reverts the most recent edit made through this server.
+Before posting publicly: scan_sensitive → show the user the numbered findings → preview_censor → find_text for anything they name → apply_censor with the ids they confirm. Never apply without the user's confirmation.`;
 
 const project = z.string().default("latest").describe('Project id from list_projects, or "latest".');
 const sec = z.number().nonnegative();
@@ -255,5 +258,70 @@ export function createServer(ctx: ToolContext): McpServer {
 		guarded(async (a) => json(await undoEdit(ctx, a.project))),
 	);
 
+	server.registerTool(
+		"scan_sensitive",
+		{
+			description:
+				"Find sensitive text in the recording with on-device OCR (money columns and amounts, emails, name/description columns, API keys, UUIDs, URLs, browser chrome, plus the user's config). Returns numbered findings with masked examples. Slow the first time per recording, then cached. Show the list to the user and let them choose before apply_censor.",
+			inputSchema: {
+				project,
+				categories: z.array(z.enum(CATEGORIES)).optional().describe("Only these categories; default all enabled in config."),
+				force: z.boolean().default(false).describe("Re-run OCR instead of using the cache."),
+			},
+		},
+		guarded(async (a) => json(await scanProject(ctx, a.project, { categories: a.categories, force: a.force }))),
+	);
+
+	server.registerTool(
+		"find_text",
+		{
+			description:
+				'Add a finding for text the scan missed, e.g. a person\'s or customer\'s name the user wants hidden. query is a case-insensitive substring, or "/regex/flags".',
+			inputSchema: { project, query: z.string().min(1), label: z.string().optional() },
+		},
+		guarded(async (a) => json(await findText(ctx, a.project, a.query, a.label))),
+	);
+
+	server.registerTool(
+		"preview_censor",
+		{
+			description:
+				"Frames with red boxes around what would be blurred, so the user can check before applying. Default: one frame per finding.",
+			inputSchema: {
+				project,
+				findings: z.array(z.string()).optional().describe("Finding ids; default all."),
+				times: z.array(sec).optional().describe("Timeline seconds to show instead of the default picks."),
+				max: z.number().int().min(1).max(8).default(6),
+			},
+		},
+		guarded(async (a) => {
+			const list = await previewCensor(ctx, a.project, { findings: a.findings, times: a.times, max: a.max });
+			return {
+				content: list.flatMap((f) => [
+					{ type: "text" as const, text: f.caption },
+					{ type: "image" as const, data: f.jpeg.toString("base64"), mimeType: "image/jpeg" },
+				]),
+			};
+		}),
+	);
+
+	server.registerTool(
+		"apply_censor",
+		{
+			description:
+				"Blur the confirmed findings for their whole time on screen, in one edit (undo_last_edit reverts all of it). Requires OpenScreen to be closed. Only call after the user confirmed which findings to hide.",
+			inputSchema: {
+				project,
+				findings: z.array(z.string()).min(1).describe("Finding ids from scan_sensitive / find_text."),
+				style: z.enum(["mosaic", "blur"]).default("mosaic"),
+				intensity: z.number().min(1).max(64).default(16),
+			},
+		},
+		guarded(async (a) =>
+			json(await applyCensor(ctx, a.project, a.findings, { style: a.style, intensity: a.intensity })),
+		),
+	);
+
 	return server;
+
 }

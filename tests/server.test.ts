@@ -36,13 +36,13 @@ async function setup(opts: { appRunning?: boolean } = {}) {
 const projectFile = (ctx: ToolContext) => join(ctx.paths.projectsDir, `${PROJECT_ID}.openscreen`);
 
 describe("MCP server", () => {
-	it("exposes the 13 tools", async () => {
+	it("exposes the 17 tools", async () => {
 		const { client } = await setup();
 		const names = (await client.listTools()).tools.map((t) => t.name).sort();
 		expect(names).toEqual([
-			"add_blur", "add_text", "add_zoom", "analyze_recording", "cut_range", "describe_project",
-			"get_frames", "list_projects", "remove_region", "set_speed", "transcribe", "undo_last_edit",
-			"update_region",
+			"add_blur", "add_text", "add_zoom", "analyze_recording", "apply_censor", "cut_range",
+			"describe_project", "find_text", "get_frames", "list_projects", "preview_censor",
+			"remove_region", "scan_sensitive", "set_speed", "transcribe", "undo_last_edit", "update_region",
 		]);
 	});
 
@@ -99,5 +99,12 @@ describe("MCP server", () => {
 		expect(r.isError).toBe(false);
 		expect(r.content[0]).toMatchObject({ type: "text", text: expect.stringMatching(/^t=1\.00s: click/) });
 		expect(r.content[1]).toMatchObject({ type: "image", mimeType: "image/jpeg" });
+	});
+	it("scans a project with no sensitive text over MCP", async () => {
+		const { json, ctx } = await setup();
+		if (!ctx.bins.ffmpeg || !ctx.bins.swiftc) return;
+		const result = await json("scan_sensitive", {});
+		expect(result.findings).toEqual([]);
+		expect(result.config.path).toBe(ctx.paths.censorConfig);
 	});
 });

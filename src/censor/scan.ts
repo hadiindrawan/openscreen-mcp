@@ -1,15 +1,18 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
+import { extractFrameWithBoxes } from "../analysis/frames";
 import { fileExists, requireBin } from "../analysis/media";
 import { ensureOcrHelper, type OcrLine, runOcr } from "../analysis/ocr";
 import { sampleFrames } from "../analysis/sample";
-import { sourceSpanToTimeline } from "../edit/timemap";
+import { round3, sourceSpanToTimeline, timelineToSource } from "../edit/timemap";
 import { ToolError } from "../errors";
 import type { LoadedProject } from "../project/store";
 import type { Doc } from "../project/types";
 import type { ToolContext } from "../tools/context";
-import { type AssetOnTimeline, assetsOnTimeline } from "../tools/understand";
+import { applyEdit } from "../tools/edit";
+import { type AssetOnTimeline, assetsOnTimeline, type Frame } from "../tools/understand";
+import { type CensorLook, censorAnnotations } from "./apply";
 import { classifyFrame, termDetections } from "./classify";
 import { type Category, compileMatcher, describeConfig, loadCensorConfig, restrictCategories } from "./config";
 import { type TrackedGroup, trackDetections } from "./track";
@@ -153,4 +156,57 @@ export async function findText(ctx: ToolContext, ref: string, query: string, lab
 	scan.findings.push(...added);
 	await writeScan(ctx, scan);
 	return added.map((f) => summarize(loaded.doc, f));
+}
+
+function pick(scan: ScanStore, ids: string[] | undefined): ScanFinding[] {
+	if (!ids?.length) return scan.findings;
+	return ids.map((id) => {
+		const f = scan.findings.find((x) => x.id === id);
+		if (!f) throw new ToolError(`Unknown finding ${id}. Use the ids from the latest scan_sensitive.`);
+		return f;
+	});
+}
+
+/** Middle of a finding's longest segment, on the timeline. */
+function busiestTime(doc: Doc, f: ScanFinding): number | null {
+	const longest = [...f.segments].sort((a, b) => b.end - b.start - (a.end - a.start))[0];
+	if (!longest) return null;
+	const span = sourceSpanToTimeline(doc.timeline.clips, f.assetId, longest.start, longest.end)[0];
+	return span ? round3((span.start + span.end) / 2) : null;
+}
+
+export async function previewCensor(
+	ctx: ToolContext,
+	ref: string,
+	opts: { findings?: string[]; times?: number[]; max: number },
+): Promise<Frame[]> {
+	const ffmpeg = requireBin(ctx.bins.ffmpeg, "ffmpeg", "Install it with `brew install ffmpeg`.");
+	const { loaded, scan } = await loadFreshScan(ctx, ref);
+	const chosen = pick(scan, opts.findings);
+	const doc = loaded.doc;
+	const wanted = opts.times?.length
+		? opts.times
+		: chosen.map((f) => busiestTime(doc, f)).filter((t): t is number => t !== null);
+	const times = [...new Set(wanted.map((t) => Math.round(t * 10) / 10))].sort((a, b) => a - b).slice(0, opts.max);
+	const out: Frame[] = [];
+	for (const t of times) {
+		const position = timelineToSource(doc.timeline.clips, t);
+		if (!position) throw new ToolError(`${t}s is outside the timeline.`);
+		const video = doc.assets.find((a) => a.id === position.clip.assetId)?.originalPath;
+		if (!video || !(await fileExists(video))) throw new ToolError(`The video for ${t}s is missing.`);
+		const active = chosen
+			.filter((f) => f.assetId === position.clip.assetId)
+			.map((f) => ({ f, rects: f.segments.filter((s) => s.start <= position.sourceSec && position.sourceSec <= s.end).map((s) => s.rect) }))
+			.filter((a) => a.rects.length > 0);
+		const caption = `t=${t.toFixed(2)}s: ${active.length ? active.map((a) => `${a.f.id} ${a.f.label}`).join(", ") : "nothing blurred here"}`;
+		const jpeg = await extractFrameWithBoxes(ffmpeg, video, position.sourceSec, active.flatMap((a) => a.rects));
+		out.push({ at: t, caption, jpeg });
+	}
+	return out;
+}
+
+export async function applyCensor(ctx: ToolContext, ref: string, ids: string[], look: CensorLook) {
+	const { scan } = await loadFreshScan(ctx, ref);
+	const chosen = pick(scan, ids);
+	return applyEdit(ctx, ref, (doc) => censorAnnotations(doc, chosen, look));
 }
