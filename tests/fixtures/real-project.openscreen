@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 7,
+  "project": {
+    "id": "proj_0dbaa405-6a72-41b9-a849-557b7b133df2",
+    "title": "Recording 9/22/2026, 10:55:34 AM",
+    "createdAt": "2026-09-22T03:55:34.856Z",
+    "updatedAt": "2026-09-23T09:33:04.438Z",
+    "primaryAssetId": "asset_17e86a0b-9b6c-4df0-ba46-3af35cc0493f"
+  },
+  "assets": [
+    {
+      "id": "asset_17e86a0b-9b6c-4df0-ba46-3af35cc0493f",
+      "kind": "video",
+      "label": "recording-1790049298542.mp4",
+      "originalPath": "/Users/hadi/Library/Application Support/openscreen/recordings/recording-1790049298542.mp4",
+      "durationSec": 35.23,
+      "sizeBytes": 20666226,
+      "video": {
+        "codec": "unknown",
+        "width": 3600,
+        "height": 2122,
+        "fps": 0
+      },
+      "transcriptionFailure": {
+        "kind": "no-audio",
+        "message": "Error invoking remote method 'stt:transcribe': NoAudioTrackError: No decodable audio in /Users/hadi/Library/Application Support/openscreen/recordings/recording-1790049298542.mp4: [out#0/f32le @ 0x14ff08ac0] Output file does not contain any stream\nError opening output file -.\nError opening output files: Invalid argument",
+        "at": "2026-09-22T03:55:35.241Z"
+      },
+      "cameraTrack": null
+    }
+  ],
+  "transcript": null,
+  "transcripts": [],
+  "timeline": {
+    "clips": [
+      {
+        "id": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+        "assetId": "asset_17e86a0b-9b6c-4df0-ba46-3af35cc0493f",
+        "sourceStartSec": 0,
+        "sourceEndSec": 35.23,
+        "timelineStartSec": 0,
+        "timelineEndSec": 35.23,
+        "wordRefs": [],
+        "origin": "user",
+        "reason": "Auto-created full-duration clip"
+      }
+    ],
+    "gaps": [],
+    "trimRanges": [
+      {
+        "id": "trim_c70f61a7-ae9a-4f7f-a21e-2aa9fc70cef7",
+        "assetId": "asset_17e86a0b-9b6c-4df0-ba46-3af35cc0493f",
+        "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+        "startSec": 14.162349010120739,
+        "endSec": 15.689112149325284,
+        "reason": "Dead stretch: cursor frozen, no interaction — remove idle",
+        "origin": "agent"
+      },
+      {
+        "id": "trim_e0ccfe95-6a08-4b17-b0b3-e1d0fe5f30c0",
+        "assetId": "asset_17e86a0b-9b6c-4df0-ba46-3af35cc0493f",
+        "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+        "startSec": 30.941195756392048,
+        "endSec": 32.05247438742897,
+        "reason": "Dead stretch: cursor frozen, no interaction — remove idle",
+        "origin": "agent"
+      }
+    ],
+    "muteRanges": [],
+    "speedRanges": [],
+    "captionRanges": []
+  },
+  "annotations": [],
+  "zoomRanges": [
+    {
+      "id": "zoom_53f0a8a7-b5f3-4607-b62d-ed6ae593a7a5",
+      "startMs": 4370,
+      "endMs": 6370,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 4.37,
+      "sourceEndSec": 6.37,
+      "depth": 4,
+      "focus": {
+        "cx": 0.9098207885304659,
+        "cy": 0.23887993676081606
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_15b3da7f-8034-4d60-9b08-7871888daba8",
+      "startMs": 741,
+      "endMs": 2741,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 0.741,
+      "sourceEndSec": 2.741,
+      "depth": 4,
+      "focus": {
+        "cx": 0.9511324786324787,
+        "cy": 0.1867251504386282
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_b62c4a2a-b670-482b-a211-d60676bf3f47",
+      "startMs": 20952,
+      "endMs": 22952,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 20.952,
+      "sourceEndSec": 22.952,
+      "depth": 5,
+      "focus": {
+        "cx": 0.7326388888888892,
+        "cy": 0.6904806786050897
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_d43f12ad-3143-4c81-90ba-e8d2f06c4108",
+      "startMs": 16644,
+      "endMs": 18644,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 16.644,
+      "sourceEndSec": 18.644,
+      "depth": 4,
+      "focus": {
+        "cx": 0.8942666666666672,
+        "cy": 0.17873704052780404
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_b45ba6e0-78e7-4920-a174-4dcfa614fda6",
+      "startMs": 23684,
+      "endMs": 25684,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 23.684,
+      "sourceEndSec": 25.684,
+      "depth": 4,
+      "focus": {
+        "cx": 0.7503086419753086,
+        "cy": 0.6516284427688765
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_503a4e6d-f1cd-4b52-8a75-309d8ca1f1a0",
+      "startMs": 27175,
+      "endMs": 29175,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 27.175,
+      "sourceEndSec": 29.175,
+      "depth": 5,
+      "focus": {
+        "cx": 0.8750000000000002,
+        "cy": 0.6468627978995558
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_3637e6a3-537a-4ea6-adb8-e6efbfacff5b",
+      "startMs": 33230,
+      "endMs": 35230,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 33.23,
+      "sourceEndSec": 35.23,
+      "depth": 4,
+      "focus": {
+        "cx": 0.5755555555555557,
+        "cy": 0.9713058959053306
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_85f008dc-44fc-4945-a612-38d55920e973",
+      "startMs": 10784,
+      "endMs": 12784,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 10.784,
+      "sourceEndSec": 12.784,
+      "depth": 4,
+      "focus": {
+        "cx": 0.6095597484276727,
+        "cy": 0.8103071150392117
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_7dfd7217-7976-4364-8783-d6ac22f6b0f0",
+      "startMs": 8136,
+      "endMs": 10136,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 8.136,
+      "sourceEndSec": 10.136,
+      "depth": 5,
+      "focus": {
+        "cx": 0.6167000000000002,
+        "cy": 0.4562299717247882
+      },
+      "focusMode": "auto"
+    },
+    {
+      "id": "zoom_416c0146-2214-416f-84d9-535960bcf02b",
+      "startMs": 18950,
+      "endMs": 20850,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 18.95,
+      "sourceEndSec": 20.85,
+      "depth": 5,
+      "focus": {
+        "cx": 0.72,
+        "cy": 0.54
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_ac699dcb-c3de-4779-accd-c4d3ddff237a",
+      "startMs": 25900,
+      "endMs": 27100,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 25.9,
+      "sourceEndSec": 27.1,
+      "depth": 5,
+      "focus": {
+        "cx": 0.725,
+        "cy": 0.745
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_a521fe88-db2c-406f-ac57-cda9deb6a99b",
+      "startMs": 2741,
+      "endMs": 4370,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 2.741,
+      "sourceEndSec": 4.37,
+      "depth": 4,
+      "focus": {
+        "cx": 0.77,
+        "cy": 0.3
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_de198349-9c0f-40a4-b6dd-24da7eb24cb6",
+      "startMs": 740,
+      "endMs": 6370,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 0.74,
+      "sourceEndSec": 6.37,
+      "depth": 4,
+      "focus": {
+        "cx": 0.88,
+        "cy": 0.27
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_acd5307a-447c-454d-8f18-ca7606fc1b9b",
+      "startMs": 8140,
+      "endMs": 12780,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 8.14,
+      "sourceEndSec": 12.78,
+      "depth": 4,
+      "focus": {
+        "cx": 0.61,
+        "cy": 0.66
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_ecd6dc27-7c34-4cf8-a5e5-87222b08f591",
+      "startMs": 23680,
+      "endMs": 29180,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 23.68,
+      "sourceEndSec": 29.18,
+      "depth": 4,
+      "focus": {
+        "cx": 0.77,
+        "cy": 0.67
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_5e6a2598-1a8c-4a3b-b9ce-d0d251ce1d0a",
+      "startMs": 33230,
+      "endMs": 35230,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 33.23,
+      "sourceEndSec": 35.23,
+      "depth": 4,
+      "focus": {
+        "cx": 0.22727272727272727,
+        "cy": 0.22727272727272727
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    },
+    {
+      "id": "zoom_b2297bc8-1588-467c-898b-9a853954dace",
+      "startMs": 16642,
+      "endMs": 16644,
+      "clipId": "clip_68ea64c4-769b-4919-b9cf-73b27a9261d5",
+      "sourceStartSec": 16.642,
+      "sourceEndSec": 16.644,
+      "depth": 4,
+      "focus": {
+        "cx": 0.5443929573976222,
+        "cy": 0.3296664798206278
+      },
+      "focusMode": "manual",
+      "source": "manual"
+    }
+  ],
+  "audioTracks": [],
+  "legacyEditor": {
+    "showBlur": true,
+    "wallpaper": "/wallpapers/wallpaper10.jpg",
+    "speedRegions": [],
+    "cursorClickBounce": 2.71,
+    "cursorMotionBlur": 0.57,
+    "cursorAutoHide": false,
+    "cursorClipToBounds": false,
+    "cursorModel3d": false,
+    "audioGainDb": 2
+  }
+}

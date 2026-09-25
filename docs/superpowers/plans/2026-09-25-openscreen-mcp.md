@@ -6,7 +6,7 @@
 
 **Architecture:** TypeScript on Node. Pure edit functions transform the raw project JSON using a time-mapping module (timeline seconds ↔ clip-anchored source seconds). A store validates every result against OpenScreen's own vendored Zod schema, backs up, and writes atomically, refusing while the app runs. Analysis helpers wrap ffmpeg, whisper-cli and the recording's cursor file. A thin tool layer exposes it all through `@modelcontextprotocol/sdk`.
 
-**Tech Stack:** Node ≥ 22 (ESM), TypeScript ~5.9, `@modelcontextprotocol/sdk` ^1.30.1, `zod` ^4.1.12, Vitest ^4.1, esbuild, ffmpeg/ffprobe (Homebrew), whisper-cli (`brew install whisper-cpp`, optional).
+**Tech Stack:** Node ≥ 22 (ESM), TypeScript ~5.9, `@modelcontextprotocol/sdk` ^1.30.1, `zod` ^4.1.12, Vitest **4.0.18** (pinned: npm 10.9.2 crashes with `edgesOut` resolving `vitest` 4.1.x peers), esbuild, ffmpeg/ffprobe (Homebrew), whisper-cli (`brew install whisper-cpp`, optional).
 
 **Spec:** `docs/superpowers/specs/2026-09-25-openscreen-mcp-design.md`
 
@@ -131,7 +131,7 @@ dist/
 Run:
 ```bash
 npm install @modelcontextprotocol/sdk@^1.30.1 zod@^4.1.12
-npm install -D typescript@~5.9.3 vitest@^4.1.10 esbuild @types/node@^22
+npm install -D typescript@~5.9.3 vitest@4.0.18 esbuild @types/node@^22   # install vitest on its own if npm crashes with edgesOut
 ```
 Expected: `package-lock.json` created, no errors.
 
