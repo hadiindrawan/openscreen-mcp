@@ -21,7 +21,12 @@ export const CURSOR_SAMPLES = [
 /** A temp OpenScreen data dir holding one 6-second project backed by a real test video. */
 export async function makeTestContext(opts: { appRunning?: boolean } = {}) {
 	const dir = await mkdtemp(join(tmpdir(), "osmcp-ctx-"));
-	const paths = resolvePaths({ OPENSCREEN_DATA_DIR: dir });
+	const paths = resolvePaths({
+		OPENSCREEN_DATA_DIR: dir,
+		OPENSCREEN_MCP_HOME: join(dir, "mcp-home"),
+		// Shared across tests so the Swift OCR helper compiles once per machine, not per test.
+		OPENSCREEN_MCP_BIN: join(tmpdir(), "osmcp-test-bin"),
+	});
 	await mkdir(paths.projectsDir, { recursive: true });
 	const bins = await findBins();
 	const video = bins.ffmpeg ? await makeTestVideo(bins.ffmpeg, dir) : join(dir, "test.mp4");

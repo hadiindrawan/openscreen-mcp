@@ -23,7 +23,7 @@ async function writeProject(id: string, doc: Doc): Promise<string> {
 
 beforeEach(async () => {
 	dir = await mkdtemp(join(tmpdir(), "osmcp-store-"));
-	paths = resolvePaths({ OPENSCREEN_DATA_DIR: dir });
+	paths = resolvePaths({ OPENSCREEN_DATA_DIR: dir, OPENSCREEN_MCP_HOME: join(dir, "home") });
 	await mkdir(paths.projectsDir, { recursive: true });
 	file = join(paths.projectsDir, `${ID}.openscreen`);
 	original = await writeProject(ID, singleClipDoc());
@@ -38,6 +38,9 @@ describe("resolvePaths", () => {
 			backupsDir: join(dir, "mcp-backups"),
 			cacheDir: join(dir, "mcp-cache"),
 			whisperModel: join(dir, "stt-models", "whisper-ggml", "ggml-small-q8_0.bin"),
+			configDir: join(dir, "home"),
+			binDir: join(dir, "home", "bin"),
+			censorConfig: join(dir, "home", "censor.json"),
 		});
 	});
 });
