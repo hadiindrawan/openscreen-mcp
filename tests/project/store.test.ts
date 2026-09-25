@@ -41,6 +41,8 @@ describe("resolvePaths", () => {
 			configDir: join(dir, "home"),
 			binDir: join(dir, "home", "bin"),
 			censorConfig: join(dir, "home", "censor.json"),
+			soundsConfig: join(dir, "home", "sounds.json"),
+			mediaDir: join(dir, "mcp-media"),
 		});
 	});
 });

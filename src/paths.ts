@@ -10,6 +10,8 @@ export interface Paths {
 	configDir: string;
 	binDir: string;
 	censorConfig: string;
+	soundsConfig: string;
+	mediaDir: string;
 }
 
 export function resolvePaths(env: Record<string, string | undefined> = process.env): Paths {
@@ -27,5 +29,7 @@ export function resolvePaths(env: Record<string, string | undefined> = process.e
 		configDir,
 		binDir: env.OPENSCREEN_MCP_BIN ?? join(configDir, "bin"),
 		censorConfig: join(configDir, "censor.json"),
+		soundsConfig: join(configDir, "sounds.json"),
+		mediaDir: join(dataDir, "mcp-media"),
 	};
 }
