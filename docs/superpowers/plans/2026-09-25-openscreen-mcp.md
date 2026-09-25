@@ -3762,3 +3762,11 @@ git commit -m "feat: add stdio entry point, build and README
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
+
+---
+
+## Execution findings
+
+- **Idle heuristic finds nothing on real data (Task 7).** On `recording-1790049298542.mp4` (16 clicks, 820 samples) the spec's rule — idle = still ≥ 2 s with no click inside the stretch — yields **0 idle stretches**, while OpenScreen's own agent cut two "cursor frozen" spans (14.16–15.69 s, 30.94–32.05 s) in that project. Cause: (a) stretch 13.17→15.09 is 1.92 s, just under 2 s; (b) stretch 29.77→33.05 starts with a click, so the whole 3.3 s is labelled "dwell". Proposed fix: measure idle from the *last click inside the stretch* and lower the threshold to 1.5 s (recovers both, plus two extra candidates Claude can reject by looking at frames). Not applied: it changes an approved definition and touches the expectations in Tasks 7, 9 and 10.
+- **vitest pinned to 4.0.18** (npm 10.9.2 crashes resolving 4.1.x peers).
+- **RTK output filter** hides vitest results ("PASS (0) FAIL (0)"); run tests as `rtk proxy npx vitest --run …`.
