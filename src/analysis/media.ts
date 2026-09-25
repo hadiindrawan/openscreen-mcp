@@ -7,10 +7,11 @@ export interface Bins {
 	ffmpeg: string | null;
 	ffprobe: string | null;
 	whisper: string | null;
+	swiftc: string | null;
 }
 
 // MCP hosts often start servers with a minimal PATH, so also look where Homebrew installs.
-const EXTRA_DIRS = ["/opt/homebrew/bin", "/usr/local/bin"];
+const EXTRA_DIRS = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"];
 
 export async function findBinary(
 	name: string,
@@ -34,6 +35,7 @@ export async function findBins(env: Record<string, string | undefined> = process
 		ffmpeg: await findBinary("ffmpeg", env),
 		ffprobe: await findBinary("ffprobe", env),
 		whisper: await findBinary("whisper-cli", env),
+		swiftc: await findBinary("swiftc", env),
 	};
 }
 
