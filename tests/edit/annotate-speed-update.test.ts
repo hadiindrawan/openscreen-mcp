@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addBlur, addText } from "../../src/edit/annotate";
+import { addBlur, addText, blurAnnotation } from "../../src/edit/annotate";
 import { cutRange } from "../../src/edit/cut";
 import { speedRegions } from "../../src/edit/regions";
 import { setSpeed } from "../../src/edit/speed";
@@ -93,6 +93,38 @@ describe("addBlur", () => {
 		expect(() =>
 			addBlur(singleClipDoc(), { start: 1, end: 2, rect: { x: 90, y: 0, width: 20, height: 10 } }),
 		).toThrow(/inside the frame/);
+	});
+
+	it("allows blurs that overlap in time", () => {
+		const first = addBlur(singleClipDoc(), { start: 1, end: 5, rect: { x: 0, y: 0, width: 10, height: 10 } });
+		const second = addBlur(first.doc, { start: 2, end: 6, rect: { x: 50, y: 50, width: 10, height: 10 } });
+		expect(second.doc.annotations).toHaveLength(2);
+		expect(valid(second.doc)).toEqual([]);
+	});
+
+	it("lets an update move a blur over another blur", () => {
+		const a = addBlur(singleClipDoc(), { start: 1, end: 2, rect: { x: 0, y: 0, width: 10, height: 10 } });
+		const b = addBlur(a.doc, { start: 3, end: 4, rect: { x: 0, y: 0, width: 10, height: 10 } });
+		expect(() => updateRegion(b.doc, { id: a.ids[0]!, end: 3.5 }, noCursor)).not.toThrow();
+	});
+});
+
+describe("blurAnnotation", () => {
+	it("builds a fully specified blur annotation", () => {
+		const f = { clipId: "clip_a", assetId: "x", sourceStartSec: 1, sourceEndSec: 2, startMs: 1000, endMs: 2000 };
+		expect(
+			blurAnnotation("annotation_1", f, { x: 1, y: 2, width: 3, height: 4 }, { style: "mosaic", shape: "rectangle", intensity: 16 }, 7),
+		).toMatchObject({
+			id: "annotation_1",
+			type: "blur",
+			startMs: 1000,
+			endMs: 2000,
+			clipId: "clip_a",
+			position: { x: 1, y: 2 },
+			size: { width: 3, height: 4 },
+			zIndex: 7,
+			blurData: { type: "mosaic", shape: "rectangle", color: "white", intensity: 16, blockSize: 16 },
+		});
 	});
 });
 

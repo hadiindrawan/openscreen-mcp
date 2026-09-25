@@ -30,7 +30,7 @@ export function updateRegion(doc: Doc, input: UpdateInput, cursorFocus: CursorFo
 		throw new ToolError("An update cannot make a region cross a clip boundary. Remove it and add it again instead.");
 	}
 	const f = fragments[0]!;
-	if (ref.kind !== "cut") assertNoOverlap(doc, ref.kind, [fragmentSpan(f)], input.id);
+	if (ref.kind !== "cut" && ref.kind !== "blur") assertNoOverlap(doc, ref.kind, [fragmentSpan(f)], input.id);
 	const anchor = {
 		startMs: f.startMs,
 		endMs: f.endMs,

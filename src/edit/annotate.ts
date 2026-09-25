@@ -2,7 +2,7 @@ import { ToolError } from "../errors";
 import type { AnnotationRegion, Doc } from "../project/types";
 import { createId } from "../vendor/shims";
 import { assertNoOverlap, type EditResult } from "./regions";
-import { anchorSpan, fragmentSpan } from "./timemap";
+import { anchorSpan, type Fragment, fragmentSpan } from "./timemap";
 
 export const TEXT_ANIMATIONS = ["none", "fade", "rise", "pop", "slide-left", "typewriter", "pulse"] as const;
 export type TextAnimation = (typeof TEXT_ANIMATIONS)[number];
@@ -90,6 +90,44 @@ export function addText(doc: Doc, input: TextInput): EditResult {
 	return { doc: next, ids };
 }
 
+export interface BlurLook {
+	style: "blur" | "mosaic";
+	shape: "rectangle" | "oval";
+	intensity: number;
+}
+
+/** One blur annotation for one clip fragment; rect in percent of the clip's screen rect. */
+export function blurAnnotation(
+	id: string,
+	f: Fragment,
+	rect: { x: number; y: number; width: number; height: number },
+	look: BlurLook,
+	zIndex: number,
+): AnnotationRegion {
+	return {
+		id,
+		startMs: f.startMs,
+		endMs: f.endMs,
+		clipId: f.clipId,
+		sourceStartSec: f.sourceStartSec,
+		sourceEndSec: f.sourceEndSec,
+		type: "blur",
+		content: "",
+		position: { x: rect.x, y: rect.y },
+		size: { width: rect.width, height: rect.height },
+		style: baseStyle(),
+		zIndex,
+		blurData: {
+			type: look.style,
+			shape: look.shape,
+			color: "white",
+			intensity: look.intensity,
+			blockSize: look.intensity,
+		},
+	};
+}
+
+/** Blurs may overlap each other in time: a privacy mask often needs several at once. */
 export function addBlur(doc: Doc, input: BlurInput): EditResult {
 	const { x, y, width, height } = input.rect;
 	if (width <= 0 || height <= 0 || x < 0 || y < 0 || x + width > 100 || y + height > 100) {
@@ -98,31 +136,11 @@ export function addBlur(doc: Doc, input: BlurInput): EditResult {
 		);
 	}
 	const fragments = anchorSpan(doc.timeline.clips, input.start, input.end);
-	assertNoOverlap(doc, "blur", fragments.map(fragmentSpan));
 	const next = structuredClone(doc);
+	const look: BlurLook = { style: input.style ?? "blur", shape: input.shape ?? "rectangle", intensity: 12 };
 	const ids = fragments.map((f) => {
 		const id = createId("annotation");
-		next.annotations.push({
-			id,
-			startMs: f.startMs,
-			endMs: f.endMs,
-			clipId: f.clipId,
-			sourceStartSec: f.sourceStartSec,
-			sourceEndSec: f.sourceEndSec,
-			type: "blur",
-			content: "",
-			position: { x, y },
-			size: { width, height },
-			style: baseStyle(),
-			zIndex: nextZIndex(next),
-			blurData: {
-				type: input.style ?? "blur",
-				shape: input.shape ?? "rectangle",
-				color: "white",
-				intensity: 12,
-				blockSize: 12,
-			},
-		});
+		next.annotations.push(blurAnnotation(id, f, input.rect, look, nextZIndex(next)));
 		return id;
 	});
 	return { doc: next, ids };
