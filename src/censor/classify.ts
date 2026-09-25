@@ -83,6 +83,17 @@ function headerKind(text: string, config: CensorConfig): "money" | "names" | nul
 
 const ALIGN = 0.01;
 
+function median(values: number[]): number {
+	const sorted = [...values].sort((a, b) => a - b);
+	const mid = Math.floor(sorted.length / 2);
+	return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+}
+
+/**
+ * Cells under a header, stopping at the first gap taller than 3 row pitches. The pitch is the
+ * median spacing between cell tops: OCR box heights vary a lot for the same text, so a gap
+ * measured in box heights breaks columns at any oddly short line.
+ */
 function columnCells(header: OcrLine, lines: OcrLine[]): OcrLine[] {
 	const aligned = (c: OcrLine) =>
 		Math.abs(c.x - header.x) <= ALIGN ||
@@ -91,12 +102,15 @@ function columnCells(header: OcrLine, lines: OcrLine[]): OcrLine[] {
 	const below = lines
 		.filter((c) => c !== header && c.y > header.y + header.h / 2 && aligned(c))
 		.sort((a, b) => a.y - b.y);
+	const tops = [header.y, ...below.map((c) => c.y)];
+	const spacings = tops.slice(1).map((y, i) => y - tops[i]!).filter((d) => d > 0.008);
+	const pitch = spacings.length ? median(spacings) : Math.max(header.h * 2.5, 0.03);
 	const cells: OcrLine[] = [];
-	let prev = header;
+	let prevTop = header.y;
 	for (const c of below) {
-		if (c.y - (prev.y + prev.h) > 3 * prev.h) break;
+		if (c.y - prevTop > 3 * pitch) break;
 		cells.push(c);
-		prev = c;
+		prevTop = c.y;
 	}
 	return cells;
 }

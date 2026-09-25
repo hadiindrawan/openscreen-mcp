@@ -26,9 +26,32 @@ Every edit is validated against OpenScreen's own schema (vendored from `v1.12.2`
 | `list_projects`, `describe_project` | `add_zoom`, `cut_range`, `add_text`, `add_blur`, `set_speed` |
 | `analyze_recording` — clicks, dwells, idle stretches, scene changes, speech | `update_region`, `remove_region` |
 | `get_frames` — screenshots Claude can see | `undo_last_edit` |
-| `transcribe` — on-device Whisper (needs `whisper-cpp`) | |
+| `transcribe` — on-device Whisper (needs `whisper-cpp`) | `apply_censor` — blur confirmed findings (one undo) |
+| `scan_sensitive`, `find_text`, `preview_censor` — find and preview what to hide | |
 
 All times are timeline seconds as shown in the OpenScreen editor.
+
+## Censor before posting
+
+Ask Claude: "Scan my latest recording for anything sensitive before I post it."
+Claude lists numbered findings (masked), shows red-box previews, adds anything you name
+("also hide the customer name at the top"), and applies only what you confirm — as mosaic
+blurs that follow zooms, undoable in one step. Tune it in `~/.openscreen-mcp/censor.json`:
+
+```json
+{
+  "categories": { "money": true, "emails": true, "names": true, "secrets": true, "urls": true, "chrome": true },
+  "alwaysHide": ["ADONAN", "/SEWU SEGAR/i"],
+  "neverHide": ["Matchmade"],
+  "names": [],
+  "moneyHeaders": [],
+  "nameHeaders": []
+}
+```
+
+The first scan compiles a small Swift OCR helper (needs Xcode command line tools). Limits: macOS
+only, text only (no faces/images), a moving item gets a chain of fixed blurs, and a dialog over a
+censored column can be partly pixelated. See `docs/acceptance.md`.
 
 ## After updating OpenScreen
 

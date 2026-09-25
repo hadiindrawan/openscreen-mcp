@@ -115,6 +115,29 @@ describe("classifyFrame", () => {
 	});
 });
 
+describe("column chaining on irregular OCR boxes", () => {
+	const header = L("Trans Description", 0.24, 0.212, 0.049, 0.013);
+	const cell = (y: number, h: number) => L("ACME TRADING REF000001", 0.24, y, 0.141, h);
+	const columnRect = (lines: OcrLine[]) =>
+		one(classifyFrame(lines, defaultCensorConfig("/x")), "column:trans description")[0]!.rect;
+
+	it("keeps the column whole when one OCR box is unusually short", () => {
+		// A real recording gave a 0.007-tall box (a misread row) between 0.013-tall ones.
+		const rect = columnRect([header, cell(0.244, 0.007), cell(0.276, 0.013), cell(0.308, 0.013), cell(0.34, 0.013)]);
+		expect(rect.y + rect.h).toBeCloseTo(0.34 + 0.013, 3);
+	});
+
+	it("bridges a row hidden behind an overlay", () => {
+		const rect = columnRect([header, cell(0.244, 0.013), cell(0.276, 0.013), cell(0.34, 0.013), cell(0.372, 0.013)]);
+		expect(rect.y + rect.h).toBeCloseTo(0.372 + 0.013, 3);
+	});
+
+	it("still stops at a big gap", () => {
+		const rect = columnRect([header, cell(0.244, 0.013), cell(0.276, 0.013), cell(0.7, 0.013)]);
+		expect(rect.y + rect.h).toBeCloseTo(0.276 + 0.013, 3);
+	});
+});
+
 describe("termDetections", () => {
 	it("finds every occurrence of a term with its own key", () => {
 		const ds = termDetections(frame, compileMatcher("ACME"), { category: "custom", group: "custom:ACME", groupLabel: "x" });
