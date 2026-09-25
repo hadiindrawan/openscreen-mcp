@@ -31,8 +31,9 @@ cut the dead time", then reopen the project in the OpenScreen app to preview, tw
 - Cursor file: `{ version: 2, provider, samples[], assets[] }`; each sample
   `{ timeMs, cx, cy, visible, interactionType: "move" | "click" | "mouseup", assetId }`,
   `cx`/`cy` are 0–1 frame fractions, `timeMs` is **asset source time**.
-- Upstream schema source: `getopenscreen/openscreen@d951e532b35f2eb643fdfc1a52da7d3a5d27c344`,
-  `src/lib/ai-edition/schema/index.ts`.
+- Upstream schema source: `getopenscreen/openscreen` tag **`v1.12.2`** (matches the installed
+  app; byte-identical to `main@d951e53` on 2026-09-25), `src/lib/ai-edition/schema/index.ts`,
+  which depends on `zod ^4.1.12`.
 
 ## The document model we write (v7)
 
@@ -78,7 +79,7 @@ Each unit has one job and can be tested on its own:
 | Unit | Responsibility | Depends on |
 |---|---|---|
 | `paths.ts` | Resolve the data dir (`OPENSCREEN_DATA_DIR` env override for tests), projects dir, backup dir, cache dir, whisper model path. | — |
-| `vendor/schema.ts` | Upstream `documentSchema`, copied verbatim at the pinned SHA, with 3 local shims (below). | `zod` |
+| `vendor/schema.ts` | Upstream `documentSchema`, copied verbatim at the pinned tag, with 3 local shims (below). | `zod` |
 | `project/store.ts` | `listProjects`, `loadProject(id \| "latest")`, `saveProject(doc)` (validate → backup → atomic write), `undo(id)`. | paths, schema, guard |
 | `project/guard.ts` | `assertAppNotRunning()`; injectable process check for tests. | — |
 | `edit/timemap.ts` | RAW span → per-clip anchored fragments; SOURCE time → RAW time(s); RAW time → `{clip, sourceSec}`. Pure functions. | — |
@@ -86,7 +87,7 @@ Each unit has one job and can be tested on its own:
 | `analysis/cursor.ts` | Parse cursor file → clicks, dwells, idle stretches, median position in a span. | — |
 | `analysis/scenes.ts` | ffmpeg scene-change detection → timestamps. | ffmpeg |
 | `analysis/frames.ts` | Extract JPEG frames at source times. | ffmpeg |
-| `analysis/transcript.ts` | ffmpeg → 16 kHz mono WAV → `whisper-cli` → word-level segments. | ffmpeg, whisper-cli |
+| `analysis/transcript.ts` | ffmpeg → 16 kHz mono WAV → `whisper-cli` → timestamped sentence segments (`-oj` JSON). | ffmpeg, whisper-cli |
 | `analysis/cache.ts` | Per-asset cache in `<dataDir>/mcp-cache/<assetId>/` keyed by the video's size + mtime. | paths |
 
 ### Vendored schema shims
@@ -96,10 +97,10 @@ The upstream file imports three helpers. The server only ever parses **v7** docu
 that use them never run:
 
 - `createId(prefix)` → `${prefix}_${crypto.randomUUID()}` (identical to upstream).
-- `toAspectRatioToken` → copied from upstream `src/utils/aspectRatioUtils.ts` at the same SHA.
+- `toAspectRatioToken` → copied from upstream `src/utils/aspectRatioUtils.ts` at the same tag.
 - `anchorRegionsWithDerivedMs` → throws `"pre-v7 documents are not supported"`.
 
-The zod major version must match upstream's `package.json` at the pinned SHA.
+The zod major version must match upstream's `package.json` at the pinned tag (zod 4).
 
 ## Time convention for every tool
 
@@ -147,12 +148,15 @@ Cursor dwell/idle thresholds: "still" means moved less than 0.5 % of the frame's
 | `remove_region` | `project`, `id` | Removes a zoom, cut, annotation or speed region by ID. Removing a cut restores that footage. |
 | `undo_last_edit` | `project` | Restores the backup taken before the server's most recent write to that project. |
 
-**Overlap rule (repel):** `add_zoom`, `set_speed`, and `add_text`/`add_blur` reject a span
-that overlaps an existing region of the same kind, naming the conflicting ID and span so
-Claude can `update_region` or `remove_region` first. Cuts may overlap; the app merges them.
+**Overlap rule (repel):** `add_zoom` rejects overlap with another zoom, `set_speed` with
+another speed region, `add_text` with another text, `add_blur` with another blur (text and
+blur may overlap each other). The error names the conflicting ID and span so Claude can
+`update_region` or `remove_region` first. Cuts may overlap; the app merges them.
 
-Every edit returns the updated `describe_project` summary for the affected region kind, so
-Claude sees the result without another call.
+Every edit returns the changed region IDs plus the full updated `describe_project` summary,
+so Claude sees the result without another call. A region that spans several clips gets one
+ID per clip fragment; `update_region` works on a single fragment and refuses to move it
+across a clip boundary (remove and re-add instead).
 
 ## Write path
 
@@ -163,11 +167,15 @@ Claude sees the result without another call.
    next save. Quit OpenScreen (⌘Q), then retry." Reads never check this.
 2. Stale-read check — the file's SHA-256 must equal the hash recorded when this edit loaded
    it; otherwise fail "project changed on disk since it was read; retry".
-3. Set `project.updatedAt` to now; run `documentSchema.parse`. A validation failure is a
-   server bug: return the zod issues and write nothing.
+3. Set `project.updatedAt` to now; run `documentSchema.safeParse` as a **gate only**. A
+   validation failure is a server bug: return the zod issues and write nothing.
 4. Copy the current file to `<dataDir>/mcp-backups/<projectId>/<ISO-timestamp>.openscreen`;
    append `{ backup, writtenSha256 }` to `journal.json` in that folder; keep the newest 20.
-5. Write `JSON.stringify(parsed, null, 2)` to a temp file in `projects/`, then `rename`.
+5. Write `JSON.stringify(nextDoc, null, 2)` — the edited **raw** document, not the parse
+   output — to a temp file in `projects/`, then `rename`. Zod strips keys it does not know,
+   so writing the parse output would silently delete fields a newer app build added. Every
+   region the server creates therefore spells out all of its fields instead of relying on
+   schema defaults.
 
 `undo_last_edit`: the file's current SHA-256 must equal the journal's last `writtenSha256`
 (otherwise the user has edited in the app since, and undo refuses with that explanation);
