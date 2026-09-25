@@ -96,7 +96,7 @@ inside a URL). `rect` is the line's box; `key` groups the same item across frame
 | `urls` | the **address-bar line**: the topmost URL-like line (`domain.tld/…` or `://`) whose top is in the upper 12 % of the frame; any other line containing a URL with a query string | `addressbar` / the URL |
 | `money` | currency-marked amounts (`Rp`, `IDR`, `$`, `USD`, `€`, `£`, `¥` + number); **columns**: a header whose text matches a money word (`Balance`, `Saldo`, `Amount`, `Mutasi`, `Total`, `Price`, `Debit`, `Credit`, `Account`, `Rekening`, `Cheque`, `No. Rek` + config `moneyHeaders`) and the cells below it — lines whose horizontal centre lies within the header's x-range ± 1 % and whose top is below the header, down to the first gap taller than 3 row heights. One detection for the whole column, rect = union of header and cells. Standalone numbers of ≥ 7 digits not in a detected column | `column:<header text>` / the number |
 | `names` | **columns** whose header matches a party word (`Name`, `Customer`, `Client`, `Merchant`, `Payee`, `Description`, `Trans Description`, `Keterangan`, `Remark` + config `nameHeaders`), detected exactly like money columns; plus config `names` terms. Free-standing names elsewhere cannot be told apart from other words reliably, so Claude proposes them after looking at frames and adds them with `find_text` | `column:<header text>` / the term |
-| `chrome` | a full-width band from the top of the frame to the bottom of the **row below the address-bar line** when that row lies within 6 % of frame height (the bookmarks bar), else to the bottom of the address-bar line, plus 0.5 % padding. Only on frames where an address bar was found | `chrome` |
+| `chrome` | a full-width band from the top of the frame to the bottom of the **row below the address-bar line** when that row starts within 3.5 % of frame height below it (the bookmarks bar; 6 % would swallow the page's own nav row on the test recording, which sits 5.9 % below), else to the bottom of the address-bar line, plus 0.5 % padding. Only on frames where an address bar was found | `chrome` |
 | `custom` | config `alwaysHide` entries: plain strings match case-insensitively as substrings; `/…/flags` are regexes | the entry |
 
 Config `neverHide` entries (same syntax) remove matching detections after all rules ran.
@@ -133,7 +133,7 @@ it). For each `key`:
    that starts late is not.
 4. Segments shorter than 0.3 s are extended to 0.3 s.
 
-A finding = one key's segments, with `label` (e.g. "Balance column", "Address bar URL",
+Tracking runs per key, but a **finding groups every key of one rule** (e.g. all UUIDs, all emails, one column), so a table of 20 IDs is one finding, not 20. A finding = its keys' segments, with `label` (e.g. "Balance column", "Address bar URL",
 "Email a•••@matchmade.io"), `category`, `examples` (up to 3 masked samples: first 2 characters
 then `•••`, never the full value), `timeSpan` (first–last, timeline seconds) and `blurCount`.
 
