@@ -2069,7 +2069,8 @@ describe("describeProject", () => {
 		const summary = describeProject(realDoc());
 		expect(summary.durationSec).toBeCloseTo(35.23, 2);
 		expect(summary.cuts).toHaveLength(2);
-		expect(summary.zooms).toHaveLength(1);
+		expect(summary.zooms).toHaveLength(17);
+		expect(summary.zooms.filter((z) => z.focusMode === "auto")).toHaveLength(9);
 		expect(summary.keptDurationSec).toBeLessThan(summary.durationSec);
 	});
 });
