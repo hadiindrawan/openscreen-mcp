@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { speedRegions } from "./edit/regions";
+import { soundTracks, speedRegions } from "./edit/regions";
 import {
 	clipSourceEnd,
 	regionSpanSec,
@@ -70,6 +70,15 @@ export function describeProject(doc: Doc) {
 				style: a.blurData?.type ?? "mosaic",
 			})),
 		speeds: speedRegions(doc).map((s) => ({ id: s.id, ...regionSpanSec(clips, s), speed: s.speed })),
+		sounds: soundTracks(doc).map((s) => ({
+			id: s.id,
+			start: s.span.start,
+			end: s.span.end,
+			label: s.first.label,
+			volumeDb: s.first.gainDb,
+			loop: s.first.loop,
+			lane: s.first.kind,
+		})),
 	};
 }
 

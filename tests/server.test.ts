@@ -36,13 +36,14 @@ async function setup(opts: { appRunning?: boolean } = {}) {
 const projectFile = (ctx: ToolContext) => join(ctx.paths.projectsDir, `${PROJECT_ID}.openscreen`);
 
 describe("MCP server", () => {
-	it("exposes the 17 tools", async () => {
+	it("exposes the 22 tools", async () => {
 		const { client } = await setup();
 		const names = (await client.listTools()).tools.map((t) => t.name).sort();
 		expect(names).toEqual([
-			"add_blur", "add_text", "add_zoom", "analyze_recording", "apply_censor", "cut_range",
-			"describe_project", "find_text", "get_frames", "list_projects", "preview_censor",
-			"remove_region", "scan_sensitive", "set_speed", "transcribe", "undo_last_edit", "update_region",
+			"add_blur", "add_sound", "add_sounds_on_clicks", "add_text", "add_typing", "add_zoom",
+			"analyze_recording", "apply_censor", "cut_range", "describe_project", "find_text", "find_typing",
+			"get_frames", "list_projects", "list_sounds", "preview_censor", "remove_region", "scan_sensitive",
+			"set_speed", "transcribe", "undo_last_edit", "update_region",
 		]);
 	});
 

@@ -26,7 +26,13 @@ export function setupHint(folder: string): string {
 const durations = new Map<string, number>();
 
 async function durationOf(ffprobe: string, path: string): Promise<number | null> {
-	const s = await stat(path);
+	let s: Awaited<ReturnType<typeof stat>>;
+	try {
+		s = await stat(path); // follows symlinks; a dangling link is simply not a usable sound
+	} catch {
+		return null;
+	}
+	if (!s.isFile()) return null;
 	const key = `${path}:${s.size}:${Math.round(s.mtimeMs)}`;
 	const cached = durations.get(key);
 	if (cached !== undefined) return cached;
@@ -60,10 +66,18 @@ export async function scanLibrary(folder: string, ffprobe: string | null): Promi
 		(categories[category] ??= []).push({ category, name, path, durationSec });
 	};
 	for (const entry of entries) {
-		if (entry.isDirectory() && !entry.name.startsWith(".")) {
+		// A symlink (e.g. to a Dropbox folder) reports as neither dir nor file: resolve it.
+		let isDir = entry.isDirectory();
+		let isFile = entry.isFile();
+		if (entry.isSymbolicLink()) {
+			const target = await stat(join(folder, entry.name)).catch(() => null);
+			isDir = target?.isDirectory() ?? false;
+			isFile = target?.isFile() ?? false;
+		}
+		if (isDir && !entry.name.startsWith(".")) {
 			const dir = join(folder, entry.name);
 			for (const name of await readdir(dir)) await add(entry.name, dir, name);
-		} else if (entry.isFile()) {
+		} else if (isFile) {
 			await add(ROOT_CATEGORY, folder, entry.name);
 		}
 	}

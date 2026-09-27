@@ -38,6 +38,7 @@ describe("describeProject", () => {
 			texts: [{ id: text.ids[0], start: 1, end: 3, text: "Hello" }],
 			blurs: [{ id: blur.ids[0], start: 8, end: 9, rect: { x: 1, y: 2, width: 3, height: 4 }, style: "blur" }],
 			speeds: [{ id: speed.ids[0], start: 20, end: 25, speed: 2 }],
+			sounds: [],
 		});
 	});
 

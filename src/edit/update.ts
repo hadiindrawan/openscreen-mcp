@@ -1,4 +1,5 @@
 import { ToolError } from "../errors";
+import { clampDb } from "../sounds/config";
 import type { Doc } from "../project/types";
 import { assertNoOverlap, type EditResult, findRegion, regionNotFound, speedRegions } from "./regions";
 import { checkSpeed } from "./speed";
@@ -16,12 +17,24 @@ export interface UpdateInput {
 	color?: string;
 	speed?: number;
 	reason?: string;
+	volume?: number;
 }
 
 /** Patches one region fragment in place, so fields this server does not know survive. */
 export function updateRegion(doc: Doc, input: UpdateInput, cursorFocus: CursorFocus): EditResult {
 	const ref = findRegion(doc, input.id);
 	if (!ref) throw regionNotFound(input.id);
+	if (ref.kind === "sound") {
+		if (input.start !== undefined || input.end !== undefined) {
+			throw new ToolError("Move a sound by removing it and adding it again.");
+		}
+		if (input.volume === undefined) throw new ToolError("For a sound, update_region can only change volume.");
+		const next = structuredClone(doc);
+		for (const t of next.audioTracks) {
+			if ((t.trackId ?? t.id) === input.id) t.gainDb = clampDb(input.volume);
+		}
+		return { doc: next, ids: [input.id] };
+	}
 	if (!ref.span) {
 		throw new ToolError(`Region ${input.id} is no longer on the timeline (its clip was removed). Remove it instead.`);
 	}

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -59,5 +59,24 @@ describe.skipIf(!bins.ffmpeg || !bins.ffprobe)("scanLibrary with files", () => {
 		const lib = await scanLibrary(folder, bins.ffprobe);
 		expect(() => resolveSound(lib, "whoosh")).toThrow(/click, typing/);
 		expect(() => resolveSound(lib, "click/nope.wav")).toThrow(/a hard\.m4a/);
+	});
+});
+
+describe.skipIf(!bins.ffmpeg || !bins.ffprobe)("symlinked sound folders", () => {
+	it("follows symlinked categories and files and ignores broken links", async () => {
+		const dir = await mkdtemp(join(tmpdir(), "osmcp-lib-links-"));
+		const real = await makeSoundFolder(bins.ffmpeg!, dir, { "real-click": [["a.wav", 0.2]], "real-root": [["pop.wav", 0.25]] });
+		const folder = join(dir, "linked");
+		await mkdir(folder);
+		await symlink(join(real, "real-click"), join(folder, "click"));
+		await symlink(join(real, "real-root", "pop.wav"), join(folder, "pop.wav"));
+		await symlink(join(dir, "missing.wav"), join(folder, "broken.wav"));
+		await mkdir(join(folder, "typing"));
+		await symlink(join(dir, "missing.wav"), join(folder, "typing", "dead.wav"));
+		const lib = await scanLibrary(folder, bins.ffprobe);
+		expect(Object.keys(lib.categories).sort()).toEqual(["(root)", "click"]);
+		expect(lib.categories.click!.map((f) => f.name)).toEqual(["a.wav"]);
+		expect(lib.categories["(root)"]!.map((f) => f.name)).toEqual(["pop.wav"]);
+		await rm(dir, { recursive: true, force: true });
 	});
 });

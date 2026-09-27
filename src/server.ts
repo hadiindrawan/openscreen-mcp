@@ -12,6 +12,7 @@ import { addZoom, type Depth } from "./edit/zoom";
 import { ToolError } from "./errors";
 import type { ToolContext } from "./tools/context";
 import { applyEdit, undoEdit } from "./tools/edit";
+import { addSound, addSoundsOnClicks, addTyping, findTyping, listSounds } from "./tools/sounds";
 import { analyze, describe, frames, listProjects, SIGNALS, transcribe } from "./tools/understand";
 
 const INSTRUCTIONS = `Edits OpenScreen screen-recording projects on this Mac.
@@ -19,7 +20,8 @@ Workflow: list_projects (or use "latest") → describe_project → analyze_recor
 All times are timeline seconds as shown in the OpenScreen editor; cut sections keep their place on that timeline, so times from analyze_recording can be passed straight to edit tools.
 Edits fail while the OpenScreen app is running: ask the user to quit it (⌘Q). After editing, tell the user to reopen the project in OpenScreen to preview and export.
 undo_last_edit reverts the most recent edit made through this server.
-Before posting publicly: scan_sensitive → show the user the numbered findings → preview_censor → find_text for anything they name → apply_censor with the ids they confirm. Never apply without the user's confirmation.`;
+Before posting publicly: scan_sensitive → show the user the numbered findings → preview_censor → find_text for anything they name → apply_censor with the ids they confirm. Never apply without the user's confirmation.
+Sound effects come from the user's own folder (list_sounds) and go in the voiceover lane; they never overlap each other. Confirm typing stretches with get_frames before add_typing.`;
 
 const project = z.string().default("latest").describe('Project id from list_projects, or "latest".');
 const sec = z.number().nonnegative();
@@ -218,7 +220,7 @@ export function createServer(ctx: ToolContext): McpServer {
 		"update_region",
 		{
 			description:
-				"Change a zoom, cut, text, blur or speed region by id: new start/end plus fields for its kind (depth/focus for zooms, text/fontSize/color for text, speed for speed, reason for cuts). Fields that don't apply are ignored.",
+				"Change a zoom, cut, text, blur or speed region by id: new start/end plus fields for its kind (depth/focus for zooms, text/fontSize/color for text, speed for speed, reason for cuts). Fields that don't apply are ignored. For a sound, only volume can change.",
 			inputSchema: {
 				project,
 				id: z.string().min(1),
@@ -231,6 +233,7 @@ export function createServer(ctx: ToolContext): McpServer {
 				color: z.string().optional(),
 				speed: z.number().min(MIN_SPEED).max(MAX_SPEED).optional(),
 				reason: z.string().optional(),
+				volume: z.number().min(-60).max(12).optional().describe("Sound volume in dB."),
 			},
 		},
 		guarded(async (a) =>
@@ -243,7 +246,7 @@ export function createServer(ctx: ToolContext): McpServer {
 	server.registerTool(
 		"remove_region",
 		{
-			description: "Delete a zoom, cut, text, blur or speed region by id. Removing a cut restores that footage.",
+			description: "Delete a zoom, cut, text, blur or speed region by id. Removing a cut restores that footage. A sound id removes that whole sound.",
 			inputSchema: { project, id: z.string().min(1) },
 		},
 		guarded(async (a) => json(await applyEdit(ctx, a.project, (doc) => removeRegion(doc, a.id)))),
@@ -322,6 +325,62 @@ export function createServer(ctx: ToolContext): McpServer {
 		),
 	);
 
+	server.registerTool(
+		"list_sounds",
+		{ description: "List the user's sound effects (folder, categories, files, lengths, default volume).", inputSchema: {} },
+		guarded(async () => json(await listSounds(ctx))),
+	);
+
+	server.registerTool(
+		"add_sound",
+		{
+			description: 'Place one sound effect at a timeline time. sound is a category ("whoosh", a variant is picked) or "category/file.wav".',
+			inputSchema: {
+				project,
+				sound: z.string().min(1),
+				at: sec.describe("Timeline seconds."),
+				volume: z.number().min(-60).max(12).optional().describe("dB; default is the category's volume."),
+			},
+		},
+		guarded(async (a) => json(await addSound(ctx, a.project, a.sound, a.at, a.volume))),
+	);
+
+	server.registerTool(
+		"add_sounds_on_clicks",
+		{
+			description: "Put a sound on every recorded click (not inside cuts or other sounds), rotating through the category's variants. One undo removes them all.",
+			inputSchema: {
+				project,
+				category: z.string().default("click"),
+				volume: z.number().min(-60).max(12).optional(),
+			},
+		},
+		guarded(async (a) => json(await addSoundsOnClicks(ctx, a.project, a.category, a.volume))),
+	);
+
+	server.registerTool(
+		"find_typing",
+		{
+			description: "Candidate typing stretches from on-screen text growth. Hints only — verify each with get_frames before add_typing.",
+			inputSchema: { project },
+		},
+		guarded(async (a) => json(await findTyping(ctx, a.project))),
+	);
+
+	server.registerTool(
+		"add_typing",
+		{
+			description: "Loop a typing sound over a confirmed typing stretch (timeline seconds).",
+			inputSchema: {
+				...span,
+				sound: z.string().default("typing"),
+				volume: z.number().min(-60).max(12).optional(),
+			},
+		},
+		guarded(async (a) => json(await addTyping(ctx, a.project, a.start, a.end, a.sound, a.volume))),
+	);
+
 	return server;
+
 
 }

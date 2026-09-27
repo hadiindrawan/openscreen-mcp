@@ -95,6 +95,6 @@ describe("removeRegion", () => {
 	});
 
 	it("rejects an unknown id", () => {
-		expect(() => removeRegion(singleClipDoc(), "zoom_nope")).toThrow(/No zoom, cut, text, blur or speed region/);
+		expect(() => removeRegion(singleClipDoc(), "zoom_nope")).toThrow(/No zoom, cut, text, blur, speed or sound region/);
 	});
 });

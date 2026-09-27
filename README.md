@@ -27,7 +27,8 @@ Every edit is validated against OpenScreen's own schema (vendored from `v1.12.2`
 | `analyze_recording` — clicks, dwells, idle stretches, scene changes, speech | `update_region`, `remove_region` |
 | `get_frames` — screenshots Claude can see | `undo_last_edit` |
 | `transcribe` — on-device Whisper (needs `whisper-cpp`) | `apply_censor` — blur confirmed findings (one undo) |
-| `scan_sensitive`, `find_text`, `preview_censor` — find and preview what to hide | |
+| `scan_sensitive`, `find_text`, `preview_censor` — find and preview what to hide | `add_sound`, `add_sounds_on_clicks`, `add_typing` — sound effects |
+| `list_sounds`, `find_typing` — your sound folder, typing hints | |
 
 All times are timeline seconds as shown in the OpenScreen editor.
 
@@ -52,6 +53,21 @@ blurs that follow zooms, undoable in one step. Tune it in `~/.openscreen-mcp/cen
 The first scan compiles a small Swift OCR helper (needs Xcode command line tools). Limits: macOS
 only, text only (no faces/images), a moving item gets a chain of fixed blurs, and a dialog over a
 censored column can be partly pixelated. See `docs/acceptance.md`.
+
+## Sound effects
+
+Put your own sounds in `~/sound-effects/<category>/` (mp3, wav, m4a, aac), e.g.
+`click/`, `typing/`, `whoosh/`, `pop/`. Then ask Claude: "Add click sounds to my latest
+recording and a typing sound where I type the filter." Sounds go in OpenScreen's voiceover
+lane (your background music keeps the music lane), never overlap, skip cut sections, and each
+call is one undo. Change the folder or default volumes in `~/.openscreen-mcp/sounds.json`:
+
+```json
+{ "folder": "~/sound-effects", "volumeDb": { "click": -8, "typing": -12, "whoosh": -4, "pop": -6 } }
+```
+
+Used files are copied to `~/Library/Application Support/openscreen/mcp-media/`, so moving your
+folder never breaks a project. Typing detection is a hint; Claude checks frames before adding.
 
 ## After updating OpenScreen
 
