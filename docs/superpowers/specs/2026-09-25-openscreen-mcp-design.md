@@ -17,7 +17,7 @@ cut the dead time", then reopen the project in the OpenScreen app to preview, tw
 | How does Claude understand the video? | All three signals: key-frame screenshots, cursor clicks/pauses, voice transcript. |
 | Approach | Semantic tools (A). Claude never writes raw JSON; the server converts, validates, backs up and writes. |
 | Runtime | Node 22 + TypeScript, `@modelcontextprotocol/sdk`, `zod`, stdio transport, Vitest. |
-| Location | `~./openscreen-mcp`, local only, not published. |
+| Location | `~/openscreen-mcp`, local only, not published. |
 
 ## Environment facts this design relies on (verified 2026-09-25)
 
@@ -213,7 +213,7 @@ closed.
 
 ```bash
 npm install && npm run build
-claude mcp add --scope user openscreen -- node ~./openscreen-mcp/dist/index.js
+claude mcp add --scope user openscreen -- node ~/openscreen-mcp/dist/index.js
 brew install whisper-cpp   # only for transcripts
 ```
 

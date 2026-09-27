@@ -85,7 +85,7 @@ Files: `clicksoundeffect.mp3`, `meme-click.mp3`, `keyboard-typing-sound-effect.m
 list *scrolling*, not typing (false positive). The real typing ("tran" in the filter search box) is
 20.6–21.5 s and was **not** flagged; it was found by looking at frames.
 
-**Rehearsal on a copy** (`~./openscreen-mcp-rehearsal/`, OpenScreen was open so the
+**Rehearsal on a copy** (`~/openscreen-mcp-rehearsal/`, OpenScreen was open so the
 real project was not touched): `add_sounds_on_clicks` placed 15 click sounds (the 16th, at 35.07 s, is
 inside the cut "Tail: click on recorder stop button" and was correctly skipped) and `add_typing(20.6, 21.5)`
 placed one looped typing sound; 0 overlaps, 2 audio assets, both files copied once. Mixed preview:
