@@ -3707,7 +3707,7 @@ Local MCP server that lets Claude understand and edit [OpenScreen](https://githu
 
 ```bash
 npm install && npm run build
-claude mcp add --scope user openscreen -- node ~/Documents/Hadi/Research/openscreen-mcp/dist/index.js
+claude mcp add --scope user openscreen -- node ~./openscreen-mcp/dist/index.js
 brew install whisper-cpp   # optional, for transcripts
 ```
 
@@ -3734,7 +3734,7 @@ npm test
 
 Run:
 ```bash
-claude mcp add --scope user openscreen -- node "$HOME/Documents/Hadi/Research/openscreen-mcp/dist/index.js"
+claude mcp add --scope user openscreen -- node "$HOME./openscreen-mcp/dist/index.js"
 claude mcp list
 ```
 Expected: `openscreen: node …/dist/index.js - ✓ Connected`.
