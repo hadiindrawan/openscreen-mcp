@@ -43,7 +43,7 @@ blurs that follow zooms, undoable in one step. Tune it in `~/.openscreen-mcp/cen
 {
   "categories": { "money": true, "emails": true, "names": true, "secrets": true, "urls": true, "chrome": true },
   "alwaysHide": ["ADONAN", "/SEWU SEGAR/i"],
-  "neverHide": ["Matchmade"],
+  "neverHide": ["neverhide"],
   "names": [],
   "moneyHeaders": [],
   "nameHeaders": []

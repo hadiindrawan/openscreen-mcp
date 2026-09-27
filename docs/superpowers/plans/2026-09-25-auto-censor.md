@@ -275,7 +275,7 @@ describe("loadCensorConfig", () => {
 			JSON.stringify({
 				categories: { chrome: false },
 				alwaysHide: ["ADONAN", "/sewu/i"],
-				neverHide: ["Matchmade"],
+				neverHide: ["neverhide"],
 				names: ["Hadi"],
 				moneyHeaders: ["Nominal"],
 				nameHeaders: ["Nasabah"],
@@ -968,7 +968,7 @@ const frame: OcrLine[] = [
 	L("Pancake", 0.006, 0.088, 0.029, 0.013),
 	L("Grafana", 0.52, 0.086, 0.04, 0.017),
 	L("Worker", 0.48, 0.128, 0.039),
-	L("Matchmade Bq Id", 0.038, 0.212, 0.049, 0.013),
+	L("neverhide Bq Id", 0.038, 0.212, 0.049, 0.013),
 	L("Trans Description", 0.24, 0.212, 0.049, 0.013),
 	L("Mutasi", 0.532, 0.212, 0.022, 0.012),
 	L("Type", 0.778, 0.212, 0.015, 0.012),
@@ -2345,7 +2345,7 @@ blurs that follow zooms, undoable in one step. Tune it in `~/.openscreen-mcp/cen
 {
   "categories": { "money": true, "emails": true, "names": true, "secrets": true, "urls": true, "chrome": true },
   "alwaysHide": ["ADONAN", "/SEWU SEGAR/i"],
-  "neverHide": ["Matchmade"],
+  "neverHide": ["neverhide"],
   "names": [],
   "moneyHeaders": [],
   "nameHeaders": []

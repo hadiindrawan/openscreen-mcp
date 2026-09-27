@@ -51,7 +51,7 @@ describe("loadCensorConfig", () => {
 			JSON.stringify({
 				categories: { chrome: false },
 				alwaysHide: ["ADONAN", "/sewu/i"],
-				neverHide: ["Matchmade"],
+				neverHide: ["neverhide"],
 				names: ["Hadi"],
 				moneyHeaders: ["Nominal"],
 				nameHeaders: ["Nasabah"],

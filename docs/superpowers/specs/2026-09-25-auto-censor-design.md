@@ -107,7 +107,7 @@ Config `neverHide` entries (same syntax) remove matching detections after all ru
 {
   "categories": { "money": true, "emails": true, "names": true, "secrets": true, "urls": true, "chrome": true },
   "alwaysHide": ["ADONAN", "/SEWU SEGAR/i"],
-  "neverHide": ["Matchmade"],
+  "neverHide": ["neverhide"],
   "names": [],
   "moneyHeaders": [],
   "nameHeaders": []
@@ -134,7 +134,7 @@ it). For each `key`:
 4. Segments shorter than 0.3 s are extended to 0.3 s.
 
 Tracking runs per key, but a **finding groups every key of one rule** (e.g. all UUIDs, all emails, one column), so a table of 20 IDs is one finding, not 20. A finding = its keys' segments, with `label` (e.g. "Balance column", "Address bar URL",
-"Email a•••@matchmade.io"), `category`, `examples` (up to 3 masked samples: first 2 characters
+"Email a•••@neverhide.io"), `category`, `examples` (up to 3 masked samples: first 2 characters
 then `•••`, never the full value), `timeSpan` (first–last, timeline seconds) and `blurCount`.
 
 ## Tools

@@ -1,6 +1,6 @@
 # Auto-censor acceptance — 2026-09-25
 
-Recording: `recording-1790049298542.mp4` (35.23 s, 3600×2122, Matchmade transactions table), project
+Recording: `recording-1790049298542.mp4` (35.23 s, 3600×2122, neverhide transactions table), project
 `proj_0dbaa405-…`. OpenScreen 1.12.2, macOS 15.8 arm64. Read-only scan + preview through the built
 server (`dist/index.js`); nothing was applied to the project yet.
 
